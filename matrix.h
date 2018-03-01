@@ -1,6 +1,9 @@
 #ifndef MATRIX_H
 #define MATRIX_H
 #include <assert.h>
+#include <math.h>
+
+#define CONV 3.14 / 180
 
 struct matrix {
   double **m;
@@ -18,5 +21,12 @@ void copy_matrix(struct matrix *a, struct matrix *b);
 void print_matrix(struct matrix *m);
 void ident(struct matrix *m);
 struct matrix *matrix_mult(struct matrix *a, struct matrix *b);
+
+//transformation routines
+struct matrix * make_translate(double x, double y, double z);
+struct matrix * make_scale(double x, double y, double z);
+struct matrix * make_rotX(double theta);
+struct matrix * make_rotY(double theta);
+struct matrix * make_rotZ(double theta);
 
 #endif

@@ -156,3 +156,51 @@ void copy_matrix(struct matrix *a, struct matrix *b) {
     for (c=0; c < a->cols; c++)  
       b->m[r][c] = a->m[r][c];  
 }
+
+struct matrix *make_translate(double x, double y, double z) {
+  struct matrix *trans = new_matrix(4, 4);
+  ident(trans);
+  trans->m[0][3] = x;
+  trans->m[1][3] = y;
+  trans->m[2][3] = z;
+  return trans;
+}
+
+struct matrix *make_scale(double x, double y, double z) {
+  struct matrix *trans = new_matrix(4, 4);
+  ident(trans);
+  trans->m[0][0] = x;
+  trans->m[1][1] = y;
+  trans->m[2][2] = z;
+  return trans;
+}
+
+struct matrix *make_rotX(double theta) {
+  struct matrix *trans = new_matrix(4, 4);
+  ident(trans);
+  trans->m[1][1] = cos(theta * CONV);
+  trans->m[1][2] = -1 * sin(theta * CONV);
+  trans->m[2][1] = sin(theta * CONV);
+  trans->m[2][2] = cos(theta * CONV);
+  return trans;
+}
+
+struct matrix *make_rotY(double theta) {
+  struct matrix *trans = new_matrix(4, 4);
+  ident(trans);
+  trans->m[0][0] = cos(theta * CONV);
+  trans->m[0][2] = -1 * sin(theta * CONV);
+  trans->m[2][0] = sin(theta * CONV);
+  trans->m[2][2] = cos(theta * CONV);
+  return trans;
+}
+
+struct matrix *make_rotZ(double theta) {
+  struct matrix *trans = new_matrix(4, 4);
+  ident(trans);
+  trans->m[0][0] = cos(theta * CONV);
+  trans->m[0][1] = -1 * sin(theta * CONV);
+  trans->m[1][0] = sin(theta * CONV);
+  trans->m[1][1] = cos(theta * CONV);
+  return trans;
+}

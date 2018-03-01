@@ -21,7 +21,7 @@ void add_point( struct matrix * points, double x, double y, double z) {
   int col = points->lastcol + 1;
 
   if (col >= points->cols) {
-    grow_matrix(points, col + 1);
+    grow_matrix(points, col * 2);
   }
 
   points->m[0][col] = x;
@@ -39,13 +39,38 @@ Returns:
 add the line connecting (x0, y0, z0) to (x1, y1, z1) to points
 should use add_point
 ====================*/
+
+int check_even(struct matrix *points) {
+  if (points->lastcol % 2 == 0) {
+    printf("Error: noneven number of points, adding origin\n");
+    add_point(points, 0, 0, 0);
+    return 1;
+  }
+  return 0;
+}
+
 void add_edge( struct matrix * points, 
 	       double x0, double y0, double z0, 
 	       double x1, double y1, double z1) {
-
+  check_even(points);
+  
   add_point(points, x0, y0, z0);
   add_point(points, x1, y1, z1);
 }
+
+void add_matrix(struct matrix *points, struct matrix *mo_points) {
+
+  assert(points->rows == 4 && mo_points->rows == 4);
+  check_even(points);
+
+  int col;
+  for (col = 0; col <= mo_points->lastcol; col++) {
+
+    add_point(points, mo_points->m[0][col],
+	      mo_points->m[1][col], mo_points->m[2][col]);
+  }
+
+}	   
 
 /*======== void draw_lines() ==========
 Inputs:   struct matrix * points
@@ -60,7 +85,7 @@ void draw_lines( struct matrix * points, screen s, color c) {
   
   int i;
 
-  for (i = 0; i < points->cols / 2; i++) {
+  for (i = 0; i < (points->lastcol + 1) / 2; i++) {
     draw_line(points->m[0][2 * i], points->m[1][2 * i],
 	      points->m[0][2 * i + 1], points->m[1][2 * i + 1], s, c);
   }
