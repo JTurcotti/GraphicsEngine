@@ -1,0 +1,27 @@
+line
+200 200 0 200 300 0
+line
+200 300 0 300 300 0
+line
+300 300 0 300 200 0
+line
+300 200 0 200 200 0
+display
+translate
+50 0 0
+apply
+display
+translate
+-50 -50 0
+apply
+display
+translate
+0 50 0
+apply
+display
+translate
+0 50 0
+apply
+display
+save
+scriptout.png

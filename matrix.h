@@ -20,6 +20,7 @@ void copy_matrix(struct matrix *a, struct matrix *b);
 //functions students need to complete
 void print_matrix(struct matrix *m);
 void ident(struct matrix *m);
+//a*b -> new
 struct matrix *matrix_mult(struct matrix *a, struct matrix *b);
 
 //transformation routines

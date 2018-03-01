@@ -12,9 +12,11 @@ Returns:
 print the matrix
 */
 void print_matrix(struct matrix *m) {
+  printf("Rows: %d; Cols: %d; Lastcol: %d;\n", m->rows, m->cols, m->lastcol);
+  
   int r, c;
   for (r = 0; r < m->rows; r++) {
-    for (c = 0; c < m->cols; c++) {
+    for (c = 0; c <= m->lastcol; c++) {
       printf("%.2f ", m->m[r][c]);
     }
     printf("\n");
@@ -28,11 +30,11 @@ Returns:
 turns m in to an identity matrix
 */
 void ident(struct matrix *m) {
-  assert(m->rows == m->cols);
+  m->lastcol = m->rows;
 
   int r, c;
   for (r = 0; r < m->rows; r++) {
-    for (c = 0; c < m->cols; c++) {
+    for (c = 0; c < m->rows; c++) {
       if (r == c)
 	m->m[r][c] = 1;
       else
@@ -47,15 +49,16 @@ Inputs:  struct matrix *a
          struct matrix *b 
 Returns: 
 
-a*b -> b
+a*b -> new
 */
 struct matrix *matrix_mult(struct matrix *a, struct matrix *b) {
-  assert(a->cols == b->rows);
-  struct matrix *out = new_matrix(a->rows, b->cols);
+  assert(a->lastcol == b->rows);
+  struct matrix *out = new_matrix(a->rows, b->lastcol + 1);
+  out->lastcol = b->lastcol;
   
   int r, r2, c;
   for (r = 0; r < a->rows; r++) {
-    for (c = 0; c < b->cols; c++) {
+    for (c = 0; c <= b->lastcol; c++) {
       int sum = 0;
       
       for (r2 = 0; r2 < b->rows; r2++) {
@@ -153,7 +156,7 @@ void copy_matrix(struct matrix *a, struct matrix *b) {
   int r, c;
 
   for (r=0; r < a->rows; r++) 
-    for (c=0; c < a->cols; c++)  
+    for (c=0; c < a->lastcol; c++)  
       b->m[r][c] = a->m[r][c];  
 }
 

@@ -6,41 +6,18 @@
 #include "display.h"
 #include "draw.h"
 #include "matrix.h"
+#include "parser.h"
 
 int main() {
-
-  struct matrix *A = new_matrix(2, 3);
-  double r1[] = {1, 2, 3};
-  A->m[0] = r1;
-  double r2[] = {2, 3, 4};
-  A->m[1] = r2;
-
-  struct matrix *B = new_matrix(3, 4);
-  double s1[] = {1, 2, 3, 4};
-  double s2[] = {0, 0, 0, 0};
-  double s3[] = {2, 3, 4, 5};
-  B->m[0] = s1;
-  B->m[1] = s2;
-  B->m[2] = s3;
-
-  struct matrix *Id3 = new_matrix(3, 3);
-  ident(Id3);
-
-  printf("Matrix A (2 x 3):\n");
-  print_matrix(A);
-
-  printf("Matrix B (3 x 4):\n");
-  print_matrix(B);
-
-  printf("Matrix Id3 (3 x 3):\n");
-  print_matrix(Id3);
-
-  printf("Matrix A x B:\n");
-  print_matrix(matrix_mult(A, B));
-
-  printf("Matrix A x Id3:\n");
-  print_matrix(matrix_mult(A, Id3));
-
+  struct matrix *transform = new_matrix(4, 4);
+  ident(transform);
+  struct matrix *edges = new_matrix(4, 50);
+  screen s;
+  clear_screen(s);
+  parse_file("script.txt", transform, edges, s);
+  
+  
+  /*
   struct matrix *center = new_matrix(4, 125);
   struct matrix *corner1 = new_matrix(4, 125);
   struct matrix *corner2 = new_matrix(4, 125);
@@ -103,6 +80,6 @@ int main() {
   draw_lines(main, s, green);
 
   save_extension(s, "matout2.png");
-
+  */
   //display(s);
 }

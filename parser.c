@@ -56,19 +56,108 @@ void parse_file ( char * filename,
                   struct matrix * transform, 
                   struct matrix * edges,
                   screen s) {
-
   FILE *f;
-  char line[256];
+  char line[256], argline[256];
+
+  //color
+  color c;
+  c.green = MAX_COLOR;
+  c.red = 0;
+  c.blue = 0;
+  //end color
+  
   clear_screen(s);
 
   if ( strcmp(filename, "stdin") == 0 ) 
     f = stdin;
   else
     f = fopen(filename, "r");
-  
+
   while ( fgets(line, 255, f) != NULL ) {
+
     line[strlen(line)-1]='\0'; //remove new line
-    printf(":%s:\n",line);
+    printf(":%s\n", line);
+
+    if (!strcmp(line, "line")) {
+      double *args = malloc(6 * sizeof(double));
+      int nargs;
+      if (!fgets(argline, 255, f) ||
+	  ((nargs = sscanf(argline, "%lf %lf %lf %lf %lf %lf",
+			   args, args+1, args+2, args+3, args+4, args+5)) != 6)) {
+	printf("Error: 'line' requires 6 arguments of type double, found %d\n", nargs);
+      } else {
+	add_edge(edges, args[0], args[1], args[2], args[3], args[4], args[5]);
+      }
+      free(args);
+    } else if (!strcmp(line, "ident")) {
+      ident(transform);
+    } else if (!strcmp(line, "scale")) {
+      double *args = malloc(3 * sizeof(double));
+      int nargs;
+      if (!fgets(argline, 255, f) ||
+	  ((nargs = sscanf(argline, "%lf %lf %lf", args, args+1, args+2)) != 3)) {
+	printf("Error: 'scale' requires 3 arguments of type double, found %d\n", nargs);
+      } else {
+	transform = matrix_mult(make_scale(args[0], args[1], args[2]), transform);
+      }
+      
+      free(args);
+      
+    } else if (!strcmp(line, "translate")) {
+      double *args = malloc(3 * sizeof(double));
+      int nargs;
+      if (!fgets(argline, 255, f) ||
+	  ((nargs = sscanf(argline, "%lf %lf %lf", args, args+1, args+2)) != 3)) {
+	printf("Error: 'translate' requires 3 arguments of type double, found %d\n", nargs);
+      } else {
+	transform = matrix_mult(make_translate(args[0], args[1], args[2]), transform);
+      }
+      printf("\nTransform now: ");
+      print_matrix(transform);
+      free(args);
+    } else if (!strcmp(line, "rotate")) {
+      char *axis = malloc(1);
+      double *theta = malloc(sizeof(double));
+      if (!fgets(argline, 255, f) || (sscanf(argline, "%c %lf", axis, theta) != 2)) {
+	printf("Error: 'rotate' requires both an axis and an angle\n");
+      } else {
+	if (*axis == 'x' || *axis == 'X') {
+	  transform = matrix_mult(make_rotX(*theta), transform);
+	} else if (*axis == 'y' || *axis == 'Y') {
+	  transform = matrix_mult(make_rotY(*theta), transform);
+	} else if (*axis == 'z' || *axis == 'Z') {
+	  transform = matrix_mult(make_rotZ(*theta), transform);
+	} else {
+	  printf("Error: %c is not a valid axis\n", *axis);
+	}
+      }
+      
+    } else if (!strcmp(line, "apply")) {
+      printf("\nEdges before transform: ");
+      print_matrix(edges);
+      edges = matrix_mult(transform, edges);
+      printf("\nEdges now: ");
+      print_matrix(edges);
+    } else if (!strcmp(line, "display")) {
+      draw_lines(edges, s, c);
+    } else if (!strcmp(line, "save")) {
+      draw_lines(edges, s, c);
+      
+      char *filename = malloc(32);
+      if (!fgets(argline, 255, f) || (sscanf(argline, "%s", filename) == 0)) {
+	printf("Error: 'save' requires a filename, none given\n");
+      } else {
+	printf("saving\n");
+	save_ppm(s, filename);
+      }
+      free(filename);
+    } else if (!strcmp(line, "quit")) {
+      printf("Parse terminated\n");
+      exit(0);
+    } else {
+      printf("Error: unrecognized command '%s'\n", line);
+    }
+			  
   }
 }
   
