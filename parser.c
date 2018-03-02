@@ -155,7 +155,7 @@ void parse_file ( char * filename,
 	printf("Error: 'save' requires a filename, none given\n");
       } else {
 	printf("saving\n");
-	save_ppm(s, filename);
+	save_extension(s, filename);
       }
       free(filename);
     } else if (!strcmp(line, "quit")) {
