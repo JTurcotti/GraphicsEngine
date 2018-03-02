@@ -30,7 +30,7 @@ Returns:
 turns m in to an identity matrix
 */
 void ident(struct matrix *m) {
-  m->lastcol = m->rows;
+  m->lastcol = m->rows-1;
 
   int r, c;
   for (r = 0; r < m->rows; r++) {
@@ -52,14 +52,14 @@ Returns:
 a*b -> new
 */
 struct matrix *matrix_mult(struct matrix *a, struct matrix *b) {
-  assert(a->lastcol == b->rows);
+  assert(a->lastcol == b->rows-1);
   struct matrix *out = new_matrix(a->rows, b->lastcol + 1);
   out->lastcol = b->lastcol;
   
   int r, r2, c;
   for (r = 0; r < a->rows; r++) {
     for (c = 0; c <= b->lastcol; c++) {
-      int sum = 0;
+      double sum = 0;
       
       for (r2 = 0; r2 < b->rows; r2++) {
 	sum += a->m[r][r2] * b->m[r2][c];

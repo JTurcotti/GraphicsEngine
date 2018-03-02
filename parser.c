@@ -37,7 +37,7 @@ The file follows the following format:
 	 apply: apply the current transformation matrix to the 
 	    edge matrix
 	 display: draw the lines of the edge matrix to the screen
-	    display the screen
+	    (display the screen unimplemented)
 	 save: draw the lines of the edge matrix to the screen
 	    save the screen to a file -
 	    takes 1 argument (file name)
@@ -76,8 +76,11 @@ void parse_file ( char * filename,
   while ( fgets(line, 255, f) != NULL ) {
 
     line[strlen(line)-1]='\0'; //remove new line
-    printf(":%s\n", line);
+    if (strlen(line) == 0) {
+      continue;
+    }
 
+    printf(":%s\n", line);
     if (!strcmp(line, "line")) {
       double *args = malloc(6 * sizeof(double));
       int nargs;
@@ -99,6 +102,8 @@ void parse_file ( char * filename,
 	printf("Error: 'scale' requires 3 arguments of type double, found %d\n", nargs);
       } else {
 	transform = matrix_mult(make_scale(args[0], args[1], args[2]), transform);
+	printf("Transformation matrix: ");
+	print_matrix(make_scale(args[0], args[1], args[2]));
       }
       
       free(args);
@@ -110,10 +115,12 @@ void parse_file ( char * filename,
 	  ((nargs = sscanf(argline, "%lf %lf %lf", args, args+1, args+2)) != 3)) {
 	printf("Error: 'translate' requires 3 arguments of type double, found %d\n", nargs);
       } else {
-	transform = matrix_mult(make_translate(args[0], args[1], args[2]), transform);
+	transform = matrix_mult(make_translate(args[0], args[1], args[2]), transform);	
+	printf("Transformation matrix: ");
+	print_matrix(make_translate(args[0], args[1], args[2]));
+
       }
-      printf("\nTransform now: ");
-      print_matrix(transform);
+
       free(args);
     } else if (!strcmp(line, "rotate")) {
       char *axis = malloc(1);

@@ -156,8 +156,32 @@ void draw_steep(int x0, int y0, int x1, int y1, screen s, color c) {
 
 //Insert your line algorithm here
 void draw_line(int x0, int y0, int x1, int y1, screen s, color c) {
-  if (abs(y1 - y0) < abs(x1 - x0))
+  printf("Drawing line (%d, %d) -> (%d, %d)\n", x0, y0, x1, y1);
+  
+  if (x0 == x1) {
+    int y;
+    int dy = (y1 > y0)? 1: -1;;
+    for (y = y0; y != y1; y += dy) {
+      plot(s, c, x0, y);
+    }
+  } else if (y0 == y1) {
+    int x;
+    int dx = (x1 > x0)? 1: -1;
+    for (x = x0; x != x1; x += dx) {
+      plot(s, c, x, y0);
+    }
+  } else if (abs(y1 - y0) == abs(x1 - x0)) {
+    int dx = (x1 > x0)? 1: -1;
+    int dy = (y1 > y0)? 1: -1;
+    int i, x = x0, y = y0;
+    for (i = 0; i <= abs(x1 - x0); i++) {
+      plot(s, c, x, y);
+      x += dx;
+      y += dy;
+    }
+  } else if (abs(y1 - y0) < abs(x1 - x0)) {
     draw_shallow(x0, y0, x1, y1, s, c);
-  else
+  } else {
     draw_steep(x0, y0, x1, y1, s, c);
+  }
 }
