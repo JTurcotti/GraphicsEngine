@@ -81,7 +81,9 @@ void parse_file ( char * filename,
     }
 
     printf(":%s\n", line);
-    if (!strcmp(line, "line")) {
+    if (!strcmp(line, "quit")) {
+      break;
+    } else if (!strcmp(line, "line")) {
       double *args = malloc(6 * sizeof(double));
       int nargs;
       if (!fgets(argline, 255, f) ||
