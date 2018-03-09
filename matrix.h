@@ -2,8 +2,10 @@
 #define MATRIX_H
 #include <assert.h>
 #include <math.h>
-
-#define CONV 3.14 / 180
+#define HERMITE 0
+#define BEZIER 1
+#define CONV 3.1415 / 180
+#define TAO 6.2832
 
 struct matrix {
   double **m;

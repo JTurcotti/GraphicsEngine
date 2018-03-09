@@ -207,3 +207,42 @@ struct matrix *make_rotZ(double theta) {
   trans->m[1][1] = cos(theta * CONV);
   return trans;
 }
+
+/*======== struct matrix * make_bezier() ==========
+  Inputs:
+  Returns: The correct 4x4 matrix that can be used
+  to generate the coefiecients for a bezier curve
+  ====================*/
+struct matrix * make_bezier() {
+    return NULL;
+}
+
+/*======== struct matrix * make_hermite() ==========
+  Inputs:
+  Returns:
+>
+  The correct 4x4 matrix that can be used to generate
+  the coefiecients for a hermite curve
+  ====================*/
+struct matrix * make_hermite() {
+  return NULL;
+}
+
+/*======== struct matrix * generate_curve_coefs() ==========
+  Inputs:   double p1
+            double p2
+          double p3
+          double p4
+          int type
+  Returns:
+
+  A matrix containing the values for a, b, c and d of the
+  equation at^3 + bt^2 + ct + d for the curve defined
+  by p1, p2, p3 and p4.
+
+  Type determines whether the curve is bezier or hermite
+  ====================*/
+struct matrix * generate_curve_coefs( double p1, double p2,
+                                    double p3, double p4, int type) {
+  return NULL;
+}

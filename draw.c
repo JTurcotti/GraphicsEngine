@@ -15,7 +15,7 @@ Returns:
 adds point (x, y, z) to points and increment points.lastcol
 if points is full, should call grow on points
 ====================*/
-void add_point( struct matrix * points, double x, double y, double z) {
+void add_point(struct matrix * points, double x, double y, double z) {
   assert(points->rows == 4);
   
   int col = points->lastcol + 1;
@@ -49,7 +49,7 @@ int check_even(struct matrix *points) {
   return 0;
 }
 
-void add_edge( struct matrix * points, 
+void add_edge(struct matrix * points, 
 	       double x0, double y0, double z0, 
 	       double x1, double y1, double z1) {
   check_even(points);
@@ -80,7 +80,7 @@ Returns:
 Go through points 2 at a time and call draw_line to add that line
 to the screen
 ====================*/
-void draw_lines( struct matrix * points, screen s, color c) {
+void draw_lines(struct matrix * points, screen s, color c) {
   assert(points->rows == 4);
   
   int i;
@@ -108,7 +108,7 @@ void draw_shallow(int x0, int y0, int x1, int y1, screen s, color c) {
   
   int line_sum = 2 * dy - dx;
   int y = y0;
-  int x = x0 - 1;
+  int x = x0 - ddx;
 
   //  printf("Initial (%d, %d); ddy: %d\n", x, y, ddy);
   
@@ -137,7 +137,7 @@ void draw_steep(int x0, int y0, int x1, int y1, screen s, color c) {
   int line_sum = 2 * dx - dy;
   int x = x0;
 
-  int y = y0 - 1;
+  int y = y0 - ddy;
 
   //  printf("Initial (%d, %d); ddx: %d\n", x, y, ddx);
   
@@ -184,4 +184,44 @@ void draw_line(int x0, int y0, int x1, int y1, screen s, color c) {
   } else {
     draw_steep(x0, y0, x1, y1, s, c);
   }
+  /*color cr;
+  cr.red = 255;
+  cr.green = 0;
+  cr.blue = 0;
+  plot(s, cr, x0, y0);
+  plot(s, cr, x1, y1);*/
+}
+
+/*======== void add_circle() ==========
+  Inputs:   struct matrix * points
+            double cx
+            double cy
+            double r
+            double step
+  Returns:
+>
+  Adds the circle at (cx, cy) with radius r to points
+  ====================*/
+void add_circle(struct matrix * points,
+                 double cx, double cy, double cz,
+                 double r, double step ) {
+  double steps = -1 * step;
+  while ((steps += step) <= 1) {
+    add_edge(points,
+	     cx + r * cos(TAO * steps), cy + r * sin(TAO * steps), 0,
+	     cx + r * cos(TAO * (steps + step)), cy + r * sin(TAO * (steps + step)), 0);
+  }
+}
+
+/*
+Adds the curve bounded by the 4 points passsed as parameters
+of type specified in type (see matrix.h for curve type constants)
+to the matrix points
+====================*/
+void add_curve(struct matrix *points,
+                double x0, double y0,
+                double x1, double y1,
+                double x2, double y2,
+                double x3, double y3,
+                double step, int type ) {
 }

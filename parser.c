@@ -94,6 +94,15 @@ void parse_file ( char * filename,
 	add_edge(edges, args[0], args[1], args[2], args[3], args[4], args[5]);
       }
       free(args);
+    } else if (!strcmp(line, "circle")) {
+      double *args = malloc(5 * sizeof(double));
+      int nargs;
+      if (!fgets(argline, 255, f) ||
+	  ((nargs = sscanf(argline, "%lf %lf %lf %lf %lf", args, args+1, args+2, args+3, args+4)) != 5)) {
+	printf("Error: 'circle' requires 5 arguments of type double, found %d\n", nargs);
+      } else {
+	add_circle(edges, args[0], args[1], args[2], args[3], args[4]);
+      }
     } else if (!strcmp(line, "ident")) {
       ident(transform);
     } else if (!strcmp(line, "scale")) {
@@ -104,8 +113,6 @@ void parse_file ( char * filename,
 	printf("Error: 'scale' requires 3 arguments of type double, found %d\n", nargs);
       } else {
 	transform = matrix_mult(make_scale(args[0], args[1], args[2]), transform);
-	printf("Transformation matrix: ");
-	print_matrix(make_scale(args[0], args[1], args[2]));
       }
       
       free(args);
@@ -118,8 +125,6 @@ void parse_file ( char * filename,
 	printf("Error: 'translate' requires 3 arguments of type double, found %d\n", nargs);
       } else {
 	transform = matrix_mult(make_translate(args[0], args[1], args[2]), transform);	
-	printf("Transformation matrix: ");
-	print_matrix(make_translate(args[0], args[1], args[2]));
 
       }
 
@@ -142,11 +147,7 @@ void parse_file ( char * filename,
       }
       
     } else if (!strcmp(line, "apply")) {
-      printf("\nEdges before transform: ");
-      print_matrix(edges);
       edges = matrix_mult(transform, edges);
-      printf("\nEdges now: ");
-      print_matrix(edges);
     } else if (!strcmp(line, "display")) {
       draw_lines(edges, s, c);
     } else if (!strcmp(line, "save")) {
