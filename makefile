@@ -4,9 +4,11 @@ CFLAGS= -Wall
 LDFLAGS= -lm
 CC= gcc
 
-all: $(OBJECTS)
+all: main $(OBJECTS)
+	./main script.txt
+
+main: $(OBJECTS)
 	$(CC) -o main $(OBJECTS) $(LDFLAGS)
-	./main
 
 main.o: main.c $(HEADERS)
 	$(CC) -c main.c
@@ -14,7 +16,7 @@ main.o: main.c $(HEADERS)
 draw.o: draw.c $(HEADERS)
 	$(CC) $(CFLAGS) -c draw.c
 
-dsiplay.o: display.c $(HEADERS)
+display.o: display.c $(HEADERS)
 	$(CC) $(CFLAGS) -c display.c
 
 matrix.o: matrix.c $(HEADERS)
@@ -23,7 +25,5 @@ matrix.o: matrix.c $(HEADERS)
 parser.o: parser.c $(HEADERS)
 	$(CC) $(CFLAGS) -c parser.c
 
-run: main
-	./main
 clean:
 	rm *.o *~

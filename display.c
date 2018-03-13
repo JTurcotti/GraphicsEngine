@@ -30,6 +30,7 @@ pixel 0, 0 located at the lower left corner of the screen
 jdyrlandweaver
 ====================*/
 void plot( screen s, color c, int x, int y) {
+  
   int newy = YRES - 1 - y;
   if ( x >= 0 && x < XRES && newy >=0 && newy < YRES )
     s[x][newy] = c;
@@ -43,19 +44,15 @@ Sets every color in screen s to black
 02/12/10 09:13:40
 jdyrlandweaver
 ====================*/
-void clear_screen( screen s ) {
+void clear_screen(screen s, color c) {
 
   int x, y;
-  color c;
-
-  c.red = 0;
-  c.green = 0;
-  c.blue = 0;
 
   for ( y=0; y < YRES; y++ )
     for ( x=0; x < XRES; x++)      
       s[x][y] = c;
 }
+
 
 /*======== void save_ppm() ==========
 Inputs:   screen s
@@ -139,5 +136,14 @@ void display( screen s) {
     fprintf(f, "\n");
   }
   pclose(f);
+}
+
+color get_color(int r, int g, int b) {
+  color c;
+  c.red = r;
+  c.green = g;
+  c.blue = b;
+
+  return c;
 }
 

@@ -4,9 +4,10 @@
 #include "matrix.h"
 #include "ml6.h"
 
-void parse_file ( char * filename, 
-		  struct matrix * transform, 
-		  struct matrix * edges,
-		  screen s);
+#define STEP_SIZE 0.01
+
+void parse_file (char * filename);
+
 
 #endif
+

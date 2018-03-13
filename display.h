@@ -2,9 +2,10 @@
 #define DISPLAY_H
 
 void plot( screen s, color c, int x, int y);
-void clear_screen( screen s);
+void clear_screen( screen s, color c);
 void save_ppm( screen s, char *file);
 void save_extension( screen s, char *file);
 void display( screen s);
+color get_color(int r, int g, int b);
 
 #endif

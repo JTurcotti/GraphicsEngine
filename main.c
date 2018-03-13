@@ -8,11 +8,14 @@
 #include "matrix.h"
 #include "parser.h"
 
-int main() {
-  struct matrix *transform = new_matrix(4, 4);
-  ident(transform);
-  struct matrix *edges = new_matrix(4, 50);
-  screen s;
-  clear_screen(s);
-  parse_file("script.txt", transform, edges, s);
+int main(int nargs, char *args[]) {
+  char *input;
+  if (nargs < 2) {
+    fprintf(stderr, "please provide input filename\n");
+    return -1;
+  } else {
+    printf("reading input script: '%s'\n", args[1]);
+    input = args[1];
+  }
+  parse_file(input);
 }

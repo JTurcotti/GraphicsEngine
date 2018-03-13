@@ -156,7 +156,7 @@ void draw_steep(int x0, int y0, int x1, int y1, screen s, color c) {
 
 //Insert your line algorithm here
 void draw_line(int x0, int y0, int x1, int y1, screen s, color c) {
-  printf("Drawing line (%d, %d) -> (%d, %d)\n", x0, y0, x1, y1);
+  //printf("Drawing line (%d, %d) -> (%d, %d)\n", x0, y0, x1, y1);
   
   if (x0 == x1) {
     int y;
@@ -224,4 +224,50 @@ void add_curve(struct matrix *points,
                 double x2, double y2,
                 double x3, double y3,
                 double step, int type ) {
+  struct matrix *coeff_trans;
+  if (type == BEZIER) {
+    coeff_trans = make_bezier();
+  } else if (type == HERMITE) {
+    coeff_trans = make_hermite();
+  } else {
+    printf("Error invalid curve type %d, expected 0 (HERMITE) or 1 (BEZIER)\n", type);
+    return;
+  }
+
+  struct matrix *coeff = new_matrix(4, 2);
+  coeff->m[0][0] = x0;
+  coeff->m[0][1] = y0;
+  coeff->m[1][0] = x1;
+  coeff->m[1][1] = y1;
+  coeff->m[2][0] = x2;
+  coeff->m[2][1] = y2;
+  coeff->m[3][0] = x3;
+  coeff->m[3][1] = y3;
+  coeff->lastcol = 1;
+
+  coeff = matrix_mult(coeff_trans, coeff);
+
+  double steps = -1 * step;
+  struct matrix *time = new_matrix(1, 4);
+  struct matrix *prev_point = NULL;
+  struct matrix *point = NULL;
+  while ((steps += step) <= 1) {
+    time->m[0][0] = 1;
+    time->m[0][1] = steps;
+    time->m[0][2] = steps * steps;
+    time->m[0][3] = steps * steps * steps;
+    time->lastcol = 3;
+    point = matrix_mult(time, coeff);
+
+    if (prev_point)
+      add_edge(points, prev_point->m[0][0], prev_point->m[0][1], 0,
+	       point->m[0][0], point->m[0][1], 0);
+
+    prev_point = point;
+  }
 }
+	     
+
+
+
+  

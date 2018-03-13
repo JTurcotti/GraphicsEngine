@@ -1,4 +1,4 @@
-/*========== ml6.h ==========
+/*========== ML6.h ==========
 
 Header file for fucntions we will use in ml6
 
@@ -25,6 +25,8 @@ struct point_t {
   int green;
   int blue;
 } point_t;
+
+
 
 /*
   We can now use color as a data type representing a point.

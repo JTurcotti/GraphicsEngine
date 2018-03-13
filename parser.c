@@ -12,10 +12,8 @@
 
 /*======== void parse_file () ==========
 Inputs:   char * filename 
-          struct matrix * transform, 
-          struct matrix * pm,
-          screen s
-Returns: 
+
+Returns: void
 
 Goes through the file named filename and performs all of the actions listed in that file.
 The file follows the following format:
@@ -23,7 +21,16 @@ The file follows the following format:
      Any command that requires arguments must have those arguments in the second line.
      The commands are as follows:
          line: add a line to the edge matrix - 
-	    takes 6 arguemnts (x0, y0, z0, x1, y1, z1)
+	    takes 6 arguemnts (x_0, y_0, z_0, x_1, y_1, z_1)
+	 circle: add a circle to the edge matrix
+	    takes 4 arguments (cx, cy, cz, r)
+	 bezier: draw bezier curve from endpoints and rates of change
+	    takes 8 arguments (x_0, y_0) (x_1, y_1)
+	                      (dx/dt_0, dy/dt_0) (dx/dt_1, dy/dt_1)
+	 hermite: draw hermite curve from endpoints and control points
+	    takes 8 arguments (x_0, y_0)
+                              (ctrlx_0, ctrly_0) (ctrlx_1, ctrly_1)
+			      (x_1, y_1)
 	 ident: set the transform matrix to the identity matrix - 
 	 scale: create a scale matrix, 
 	    then multiply the transform matrix by the scale matrix - 
@@ -36,42 +43,32 @@ The file follows the following format:
 	    takes 2 arguments (axis, theta) axis should be x y or z
 	 apply: apply the current transformation matrix to the 
 	    edge matrix
-	 display: draw the lines of the edge matrix to the screen
+	 draw: draw the lines of the edge matrix to the screen
 	    (display the screen unimplemented)
+	 reset: resets the edge matrix
 	 save: draw the lines of the edge matrix to the screen
 	    save the screen to a file -
 	    takes 1 argument (file name)
 	 quit: end parsing
 
-See the file script for an example of the file format
-
-
-IMPORTANT MATH NOTE:
-the trig functions int math.h use radian mesure, but us normal
-humans use degrees, so the file will contain degrees for rotations,
-be sure to conver those degrees to radians (M_PI is the constant
-for PI)
 ====================*/
-void parse_file ( char * filename, 
-                  struct matrix * transform, 
-                  struct matrix * edges,
-                  screen s) {
+void parse_file ( char * input) {
+  struct matrix *transform = new_matrix(4, 4);
+  ident(transform);
+  struct matrix *edges = new_matrix(4, 50);
+  screen s;
+  
   FILE *f;
   char line[256], argline[256];
 
-  //color
-  color c;
-  c.green = MAX_COLOR;
-  c.red = 0;
-  c.blue = 0;
-  //end color
+  color c = get_color(0, MAX_COLOR, 0);
   
-  clear_screen(s);
+  clear_screen(s, get_color(0, 0, 0));
 
-  if ( strcmp(filename, "stdin") == 0 ) 
+  if ( strcmp(input, "stdin") == 0 ) 
     f = stdin;
   else
-    f = fopen(filename, "r");
+    f = fopen(input, "r");
 
   while ( fgets(line, 255, f) != NULL ) {
 
@@ -95,14 +92,38 @@ void parse_file ( char * filename,
       }
       free(args);
     } else if (!strcmp(line, "circle")) {
-      double *args = malloc(5 * sizeof(double));
+      double *args = malloc(4 * sizeof(double));
       int nargs;
       if (!fgets(argline, 255, f) ||
-	  ((nargs = sscanf(argline, "%lf %lf %lf %lf %lf", args, args+1, args+2, args+3, args+4)) != 5)) {
-	printf("Error: 'circle' requires 5 arguments of type double, found %d\n", nargs);
+	  ((nargs = sscanf(argline, "%lf %lf %lf %lf", args, args+1, args+2, args+3)) != 4)) {
+	printf("Error: 'circle' requires 4 arguments of type double, found %d\n", nargs);
       } else {
-	add_circle(edges, args[0], args[1], args[2], args[3], args[4]);
+	add_circle(edges, args[0], args[1], args[2], args[3], STEP_SIZE);
       }
+    } else if (!strcmp(line, "bezier")) {
+      double *args = malloc(8 * sizeof(double));
+      int nargs;
+      if (!fgets(argline, 255, f) ||
+	  ((nargs = sscanf(argline, "%lf %lf %lf %lf %lf %lf %lf %lf",
+			   args, args+1, args+2, args+3, args+4, args+5,
+			   args+6, args+7)) != 8)) {
+	printf("Error: 'bezier' requires 8 arguments of type double, found %d\n", nargs);
+      } else {
+	add_curve(edges, args[0], args[1], args[2], args[3], args[4],
+		  args[5], args[6], args[7], STEP_SIZE, BEZIER);
+      }
+    } else if (!strcmp(line, "hermite")) {
+      double *args = malloc(8 * sizeof(double));
+      int nargs;
+      if (!fgets(argline, 255, f) ||
+	  ((nargs = sscanf(argline, "%lf %lf %lf %lf %lf %lf %lf %lf",
+			   args, args+1, args+2, args+3, args+4, args+5,
+			   args+6, args+7)) != 8)) {
+	printf("Error: 'hermite' requires 8 arguments of type double, found %d\n", nargs);
+      } else {
+	add_curve(edges, args[0], args[1], args[2], args[3], args[4],
+		  args[5], args[6], args[7], STEP_SIZE, HERMITE);
+      }      
     } else if (!strcmp(line, "ident")) {
       ident(transform);
     } else if (!strcmp(line, "scale")) {
@@ -145,10 +166,18 @@ void parse_file ( char * filename,
 	  printf("Error: %c is not a valid axis\n", *axis);
 	}
       }
-      
+    } else if (!strcmp(line, "color")) {
+      int rgb[3];
+      if (!fgets(argline, 255, f) || (sscanf(argline, "%d %d %d", rgb, rgb+1, rgb+2) != 3)) {
+	printf("Error: 'color' requires three integeres\n");
+      } else {
+	c = get_color(rgb[0], rgb[1], rgb[2]);
+      }
     } else if (!strcmp(line, "apply")) {
       edges = matrix_mult(transform, edges);
-    } else if (!strcmp(line, "display")) {
+    } else if (!strcmp(line, "reset")) {
+      edges = new_matrix(4, 50);
+    } else if (!strcmp(line, "draw")) {
       draw_lines(edges, s, c);
     } else if (!strcmp(line, "save")) {
       draw_lines(edges, s, c);
@@ -157,7 +186,7 @@ void parse_file ( char * filename,
       if (!fgets(argline, 255, f) || (sscanf(argline, "%s", filename) == 0)) {
 	printf("Error: 'save' requires a filename, none given\n");
       } else {
-	printf("saving\n");
+	printf("saving as %s\n", filename);
 	save_extension(s, filename);
       }
       free(filename);
