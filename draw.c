@@ -293,15 +293,16 @@ struct matrix *generate_sphere(double cx, double cy, double cz, double r, double
   struct matrix *points = new_matrix(4, 100);
 
   double steps1 = -1 * step;
-  double z, cr, step2, steps2;
+  double z, cr, step2, steps2, offset;
   while ((steps1 += step) <= 1) {
     z = cz + r * cos(PI * steps1);
     cr = r * sin(PI * steps1);
     
     step2 = cr < .01? 2: step * r / cr;
     steps2 = -1 * step2;
+    offset = 1 / step2; //if this isn't added, layers allign too muchx
     while ((steps2 += step2) <= 1) {
-      add_point(points, cx + cr * cos(TAO * steps2), cy + cr * sin(TAO * steps2), z);
+      add_point(points, cx + cr * cos(TAO * (steps2 + offset)), cy + cr * sin(TAO * (steps2 + offset)), z);
     }
   }
   
@@ -310,7 +311,6 @@ struct matrix *generate_sphere(double cx, double cy, double cz, double r, double
 
 void add_sphere(struct matrix *points, double cx, double cy, double cz, double r, double step) {
   struct matrix *sphere_points = generate_sphere(cx, cy, cz, r, step);
-  print_matrix("sphere points", sphere_points);
   int i;
   for (i = 0; i <= sphere_points->lastcol; i++) {
     add_circle(points, sphere_points->m[0][i], sphere_points->m[1][i], sphere_points->m[2][i], 1, step);
