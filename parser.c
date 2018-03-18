@@ -43,6 +43,10 @@ The file follows the following format:
 	    takes 2 arguments (axis, theta) axis should be x y or z
 	 apply: apply the current transformation matrix to the 
 	    edge matrix
+	 color: set the drawing color to desired color
+	    takes 3 arguments (red, green, blue)
+	 background: set the background to desired color
+	    takes 3 arguments (red, green, blue)
 	 draw: draw the lines of the edge matrix to the screen
 	    (display the screen unimplemented)
 	 clear: clears the edge matrix
@@ -61,9 +65,9 @@ void parse_file ( char * input) {
   FILE *f;
   char line[256], argline[256];
 
-  color c = get_color(0, MAX_COLOR, 0);
+  color c = get_color(255, 255, 255);
   
-  clear_screen(s, get_color(255, 255, 255));
+  clear_screen(s, get_color(0, 0, 0));
 
   if ( strcmp(input, "stdin") == 0 ) 
     f = stdin;
@@ -108,6 +112,15 @@ void parse_file ( char * input) {
 	printf("Error: 'sphere' requires 4 arguments of type double, found %d\n", nargs);
       } else {
 	add_sphere(edges, args[0], args[1], args[2], args[3], STEP_SIZE * 3);
+      }
+    } else if (!strcmp(line, "torus")) {
+      double *args = malloc(5 * sizeof(double));
+      int nargs;
+      if (!fgets(argline, 255, f) ||
+	  ((nargs = sscanf(argline, "%lf %lf %lf %lf %lf", args, args+1, args+2, args+3, args+4)) != 5)) {
+	printf("Error: 'torus' requires 5 arguments of type double, found %d\n", nargs);
+      } else {
+	add_torus(edges, args[0], args[1], args[2], args[3], args[4], STEP_SIZE * 2);
       }
     } else if (!strcmp(line, "circle")) {
       double *args = malloc(4 * sizeof(double));
@@ -190,6 +203,13 @@ void parse_file ( char * input) {
 	printf("Error: 'color' requires three integeres\n");
       } else {
 	c = get_color(rgb[0], rgb[1], rgb[2]);
+      }
+    } else if (!strcmp(line, "background")) {
+      int rgb[3];
+      if (!fgets(argline, 255, f) || (sscanf(argline, "%d %d %d", rgb, rgb+1, rgb+2) != 3)) {
+	printf("Error: 'background' requires three integeres\n");
+      } else {
+	clear_screen(s, get_color(rgb[0], rgb[1], rgb[2]));
       }
     } else if (!strcmp(line, "apply")) {
       edges = matrix_mult(transform, edges);

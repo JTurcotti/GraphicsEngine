@@ -1,10 +1,152 @@
-sphere
-250 250 0 150
+background
+0 0 0
+
+box
+420 150 0 75 75 25
+ident
+translate
+-420 -150 0
+rotate
+x 45
+rotate
+y 45
+rotate
+z 45
+translate
+420 150 0
+apply
+color
+0 200 200
+draw
+clear
+
+box
+420 110 0 75 75 25
+ident
+translate
+-420 -110 0
+rotate
+x 45
+rotate
+y 45
+rotate
+z 45
+translate
+420 110 0
+apply
+color
+0 150 150
+draw
+clear
+
+box
+420 190 0 75 75 25
+ident
+translate
+-420 -190 0
+rotate
+x 45
+rotate
+y 45
+rotate
+z 45
+translate
+420 190 0
+apply
+color
+0 250 250
+draw
+clear
+
+box
+420 70 0 75 75 25
+ident
+translate
+-420 -70 0
+rotate
+x 45
+rotate
+y 45
+rotate
+z 45
+translate
+420 70 0
+apply
+color
+0 100 100
+draw
+clear
+
+torus
+250 250 0 25 100
+ident
 translate
 -250 -250 0
-
+rotate
+x 45
+rotate
+y 45
+rotate
+z 45
 translate
 250 250 0
 apply
+color
+255 0 0
+draw
+clear
+
+torus
+100 350 0 10 50
+ident
+translate
+-100 -350 0
+rotate
+x 45
+rotate
+y 67
+rotate
+z 24
+translate
+100 350 0
+apply
+color
+0 0 255
+draw
+clear
+
+torus
+80 80 0 40 50
+ident
+translate
+-80 -80 0
+rotate
+x 30
+rotate
+y -76
+rotate
+z 145
+translate
+80 80 0
+apply
+color
+0 255 0
+draw
+clear
+
+sphere
+250 70 0 30
+color
+255 255 0
+draw
+clear
+
+sphere
+300 400 0 40
+color
+255 0 255
+draw
+clear
+
 save
 pic.png

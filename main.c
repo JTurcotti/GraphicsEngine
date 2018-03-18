@@ -10,6 +10,7 @@
 
 int main(int nargs, char *args[]) {
   char *input;
+  srand(time(NULL));
   if (nargs < 2) {
     fprintf(stderr, "please provide input filename\n");
     return -1;

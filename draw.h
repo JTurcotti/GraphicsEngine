@@ -3,6 +3,8 @@
 
 #include "matrix.h"
 #include "ml6.h"
+#include <time.h>
+#include <stdlib.h>
 
 void add_point( struct matrix * points, double x, double y, double z);
 void add_edge( struct matrix * points, 
@@ -29,6 +31,10 @@ void add_box(struct matrix *points,
 void add_sphere(struct matrix *points,
 		double cx, double cy, double cz,
 		double r, double step);
+
+void add_torus(struct matrix *points,
+		double cx, double cy, double cz,
+	       double slicer, double bigr, double step);
 
 
 #endif
