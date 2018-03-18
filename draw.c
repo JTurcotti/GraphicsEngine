@@ -208,8 +208,8 @@ void add_circle(struct matrix * points,
   double steps = -1 * step;
   while ((steps += step) <= 1) {
     add_edge(points,
-	     cx + r * cos(TAO * steps), cy + r * sin(TAO * steps), 0,
-	     cx + r * cos(TAO * (steps + step)), cy + r * sin(TAO * (steps + step)), 0);
+	     cx + r * cos(TAO * steps), cy + r * sin(TAO * steps), cz,
+	     cx + r * cos(TAO * (steps + step)), cy + r * sin(TAO * (steps + step)), cz);
   }
 }
 
@@ -267,7 +267,55 @@ void add_curve(struct matrix *points,
   }
 }
 	     
+void add_box(struct matrix *points, double x, double y, double z, double x_depth, double y_depth, double z_depth) {
+  double vals[3] = {x, y, z};
+  double depths[3] = {x_depth, y_depth, z_depth};
+  int i, a, b;
+  for (i = 0; i < 3; i++) {
+    for (a = 0; a < 2; a++) {
+      for (b = 0; b < 2; b++) {
+	double xyz0[3], xyz1[3];
+	xyz0[i] = vals[i];
+	xyz0[(i + 1) % 3] = vals[(i + 1) % 3] + a * depths[(i + 1) % 3];	
+	xyz0[(i + 2) % 3] = vals[(i + 2) % 3] + b * depths[(i + 2) % 3];
 
+	xyz1[i] = vals[i] + depths[i];
+	xyz1[(i + 1) % 3] = xyz0[(i + 1) % 3];
+	xyz1[(i + 2) % 3] = xyz0[(i + 2) % 3];
+	add_edge(points, xyz0[0], xyz0[1], xyz0[2], xyz1[0], xyz1[1], xyz1[2]);
+      }
+    }
+  }
+}
 
+struct matrix *generate_sphere(double cx, double cy, double cz, double r, double step) {
+  assert(r > 0);
+  struct matrix *points = new_matrix(4, 100);
+
+  double steps1 = -1 * step;
+  double z, cr, step2, steps2;
+  while ((steps1 += step) <= 1) {
+    z = cz + r * cos(PI * steps1);
+    cr = r * sin(PI * steps1);
+    
+    step2 = cr < .01? 2: step * r / cr;
+    steps2 = -1 * step2;
+    while ((steps2 += step2) <= 1) {
+      add_point(points, cx + cr * cos(TAO * steps2), cy + cr * sin(TAO * steps2), z);
+    }
+  }
+  
+  return points;
+}
+
+void add_sphere(struct matrix *points, double cx, double cy, double cz, double r, double step) {
+  struct matrix *sphere_points = generate_sphere(cx, cy, cz, r, step);
+  print_matrix("sphere points", sphere_points);
+  int i;
+  for (i = 0; i <= sphere_points->lastcol; i++) {
+    add_circle(points, sphere_points->m[0][i], sphere_points->m[1][i], sphere_points->m[2][i], 1, step);
+  }
+}
 
   
+    

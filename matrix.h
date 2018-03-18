@@ -4,8 +4,10 @@
 #include <math.h>
 #define HERMITE 0
 #define BEZIER 1
-#define CONV 3.1415 / 180
+#define PI  3.1415
 #define TAO 6.2832
+#define CONV PI / 180
+
 
 struct matrix {
   double **m;

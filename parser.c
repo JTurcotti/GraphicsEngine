@@ -45,7 +45,7 @@ The file follows the following format:
 	    edge matrix
 	 draw: draw the lines of the edge matrix to the screen
 	    (display the screen unimplemented)
-	 reset: resets the edge matrix
+	 clear: clears the edge matrix
 	 save: draw the lines of the edge matrix to the screen
 	    save the screen to a file -
 	    takes 1 argument (file name)
@@ -63,7 +63,7 @@ void parse_file ( char * input) {
 
   color c = get_color(0, MAX_COLOR, 0);
   
-  clear_screen(s, get_color(0, 0, 0));
+  clear_screen(s, get_color(255, 255, 255));
 
   if ( strcmp(input, "stdin") == 0 ) 
     f = stdin;
@@ -91,6 +91,24 @@ void parse_file ( char * input) {
 	add_edge(edges, args[0], args[1], args[2], args[3], args[4], args[5]);
       }
       free(args);
+    } else if (!strcmp(line, "box")) {
+      double *args = malloc(6 * sizeof(double));
+      int nargs;
+      if (!fgets(argline, 255, f) ||
+	  ((nargs = sscanf(argline, "%lf %lf %lf %lf %lf %lf", args, args+1, args+2, args+3, args+4, args+5)) != 6)) {
+	printf("Error: 'box' requires 6 arguments of type double, found %d\n", nargs);
+      } else {
+	add_box(edges, args[0], args[1], args[2], args[3], args[4], args[5]);
+      }
+    } else if (!strcmp(line, "sphere")) {
+      double *args = malloc(4 * sizeof(double));
+      int nargs;
+      if (!fgets(argline, 255, f) ||
+	  ((nargs = sscanf(argline, "%lf %lf %lf %lf", args, args+1, args+2, args+3)) != 4)) {
+	printf("Error: 'sphere' requires 4 arguments of type double, found %d\n", nargs);
+      } else {
+	add_sphere(edges, args[0], args[1], args[2], args[3], STEP_SIZE * 3);
+      }
     } else if (!strcmp(line, "circle")) {
       double *args = malloc(4 * sizeof(double));
       int nargs;
@@ -175,7 +193,7 @@ void parse_file ( char * input) {
       }
     } else if (!strcmp(line, "apply")) {
       edges = matrix_mult(transform, edges);
-    } else if (!strcmp(line, "reset")) {
+    } else if (!strcmp(line, "clear")) {
       edges = new_matrix(4, 50);
     } else if (!strcmp(line, "draw")) {
       draw_lines(edges, s, c);

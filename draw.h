@@ -22,5 +22,13 @@ void add_curve(struct matrix *points,
 	       double x3, double y3,
 	       double step, int type );
 
+void add_box(struct matrix *points,
+	     double x, double y, double z,
+	     double x_depth, double y_depth, double z_depth);
+
+void add_sphere(struct matrix *points,
+		double cx, double cy, double cz,
+		double r, double step);
+
 
 #endif
