@@ -7,7 +7,7 @@
 #include "matrix.h"
 
 //function of step2:
-#define OFFSET (double) rand() / (double) RAND_MAX
+#define OFFSET 0 //(double) rand() / (double) RAND_MAX
 
 /*======== void add_point() ==========
 Inputs:   struct matrix * points
@@ -59,6 +59,16 @@ void add_edge(struct matrix * points,
   
   add_point(points, x0, y0, z0);
   add_point(points, x1, y1, z1);
+}
+
+void add_polygon(struct matrix * points,
+		 double x0, double y0, double z0,
+		 double x1, double y1, double z1,
+		 double x2, double y2, double z2) {
+  
+  add_point(points, x0, y0, z0);
+  add_point(points, x1, y1, z1);
+  add_point(points, x2, y2, z2);
 }
 
 void add_matrix(struct matrix *points, struct matrix *mo_points) {
@@ -194,6 +204,59 @@ void draw_line(int x0, int y0, int x1, int y1, screen s, color c) {
   plot(s, cr, x0, y0);
   plot(s, cr, x1, y1);*/
 }
+/*======== int draw_polygon() ========
+  Inputs:  double x0, y0, z0
+           double x1, y1, z1
+	   double x2, y2, z2
+	   screen s, color c
+  Returns: 1 if front-facing (drawn), 0 if back-facing (ignored)
+  
+  draws triangle with three given vertices
+  =========*/
+int draw_polygon(double x0, double y0, double z0,
+		 double x1, double y1, double z1,
+		 double x2, double y2, double z2,
+		 screen s, color c) {
+
+  /* back-face culling assumes that all 3d shapes are solids, and thus only the front faces must be drawn.
+     This is computed by taking the cross product of v1 - v0 and v2 - v0
+     If the z component is positive, it faces forwards and should be displayed
+     if negative, it faces away and will be hidden
+     if zero, it is perpendicular to the plane of viewing (also invisible)
+
+     (v1 - v0) x (v2 - v0) = <smth, smth, (x1 - x0)(y2 - y0) - (y1 - y0)(x2 - x0)>
+  */
+
+  if ((x1 - x0) * (y2 - 20) <= (y1 - y0) * (x2 - x0)) {
+    return 0;
+  } else {
+    draw_line(x0, y0, x1, y1, s, c);
+    draw_line(x1, y1, x2, y2, s, c);
+    draw_line(x2, y2, x0, y0, s, c);
+    return 1;
+  }
+}
+
+/*======== int draw_polygons() =======
+  Inputs: struct matrix * points
+          screen s, color c
+  Returns: number of polygons drawn
+
+  go thru points 3 each and draw corresponding polygon
+  ==================*/
+int draw_polygons(struct matrix *points, screen s, color c) {
+  int i;
+  int count = 0;
+  for (i = 0; i < (points->lastcol + 1) / 3; i++) {
+    count += draw_polygon(points->m[0][3 * i], points->m[1][3 * i], points->m[2][3 * i],
+		 points->m[0][3 * i + 1], points->m[1][3 * i + 1], points->m[2][3 * i + 1],
+			  points->m[0][3 * i + 2], points->m[1][3 * i + 2], points->m[2][3 * i + 2], s, c);
+  }
+
+  return count;
+}
+
+		 
 
 /*======== void add_circle() ==========
   Inputs:   struct matrix * points
@@ -301,7 +364,7 @@ struct matrix *generate_sphere(double cx, double cy, double cz, double r, double
     z = cz + r * cos(PI * steps1);
     cr = r * sin(PI * steps1);
     
-    step2 = cr < .01? 2: step * r / cr;
+    step2 = step; //cr < .01? 2: step * r / cr;
     steps2 = -1 * step2;
     offset = OFFSET; //if this isn't added, layers allign too muchx
     while ((steps2 += (step2 * (1 + OFFSET))) <= 1) {
@@ -331,7 +394,7 @@ struct matrix *generate_torus(double cx, double cy, double cz, double slicer, do
     z = cz + slicer * sin(TAO * steps1);
     cr = bigr + slicer * cos(TAO * steps1);
 
-    step2 = cr < .01? 2: step * (bigr + slicer) / cr;
+    step2 = step; //cr < .01? 2: step * (bigr + slicer) / cr;
     steps2 = -1 * step2;
     offset = OFFSET; //if this isn't added, layers allign too muchx
     while ((steps2 += (step2 * (1 + OFFSET))) <= 1) {

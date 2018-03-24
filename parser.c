@@ -21,16 +21,32 @@ The file follows the following format:
      Any command that requires arguments must have those arguments in the second line.
      The commands are as follows:
          line: add a line to the edge matrix - 
-	    takes 6 arguemnts (x_0, y_0, z_0, x_1, y_1, z_1)
+	    takes 6 arguemnts (x_0, y_0, z_0) 
+	                      (x_1, y_1, z_1)
+	 polygon: add a triangle to the trigs matrix -
+	    takes 9 arguments (x_0, y_0, z_0) 
+	                      (x_1, y_1, z_1) 
+			      (x_2, y_2, z_2) 
 	 circle: add a circle to the edge matrix
-	    takes 4 arguments (cx, cy, cz, r)
-	 bezier: draw bezier curve from endpoints and rates of change
+	    takes 4 arguments (x_center, y_center, z_center)
+	                       radius
+	 bezier: draw bezier curve from endpoints and rates of change -
 	    takes 8 arguments (x_0, y_0) (x_1, y_1)
 	                      (dx/dt_0, dy/dt_0) (dx/dt_1, dy/dt_1)
-	 hermite: draw hermite curve from endpoints and control points
+	 hermite: draw hermite curve from endpoints and control points -
 	    takes 8 arguments (x_0, y_0)
                               (ctrlx_0, ctrly_0) (ctrlx_1, ctrly_1)
 			      (x_1, y_1)
+	 box: draw box from minimal coordinate vertex and widths -
+	    takes 6 arguments (x_min, y_min, z_min)
+	                      (x_width, y_width, z_width)
+	 sphere: draw sphere from center and radius -
+	    takes 4 arguments (x_center, y_center, z_center)
+	                       radius
+	 torus: draw torus from center, radius of tube (minor radius), and the distance from the center to the center of the tube (major radius) -
+	    takes 5 arguments (x_center, y_center, z_center)
+	                       radius_minor
+			       radius_major
 	 ident: set the transform matrix to the identity matrix - 
 	 scale: create a scale matrix, 
 	    then multiply the transform matrix by the scale matrix - 
@@ -47,11 +63,11 @@ The file follows the following format:
 	    takes 3 arguments (red, green, blue)
 	 background: set the background to desired color
 	    takes 3 arguments (red, green, blue)
-	 draw: draw the lines of the edge matrix to the screen
-	    (display the screen unimplemented)
-	 clear: clears the edge matrix
-	 save: draw the lines of the edge matrix to the screen
-	    save the screen to a file -
+	 draw: draw the lines of the edge matrix and the triangles
+	    of the polygon matrix to the screen
+	    (displaying the screen is unimplemented)
+	 clear: clears the edge and polygon matrices
+	 save: draws and saves the screen to a file -
 	    takes 1 argument (file name)
 	 quit: end parsing
 
@@ -60,6 +76,7 @@ void parse_file ( char * input) {
   struct matrix *transform = new_matrix(4, 4);
   ident(transform);
   struct matrix *edges = new_matrix(4, 50);
+  struct matrix *trigs = new_matrix(4, 75);
   screen s;
   
   FILE *f;
@@ -73,9 +90,13 @@ void parse_file ( char * input) {
     f = stdin;
   else
     f = fopen(input, "r");
-
+  
   while ( fgets(line, 255, f) != NULL ) {
-
+    if (strchr(line, '\r')) {
+      fprintf(stderr, "Please use a script file with Unix-style (\\n) line endings\n");
+      break;
+    }
+    
     line[strlen(line)-1]='\0'; //remove new line
     if (strlen(line) == 0) {
       continue;
@@ -95,6 +116,19 @@ void parse_file ( char * input) {
 	add_edge(edges, args[0], args[1], args[2], args[3], args[4], args[5]);
       }
       free(args);
+    } else if (!strcmp(line, "polygon")) {
+      double *args = malloc(9 * sizeof(double));
+      int nargs;
+      if (!fgets(argline, 255, f) ||
+	  ((nargs = sscanf(argline, "%lf %lf %lf %lf %lf %lf %lf %lf %lf",
+			   args, args+1, args+2, args+3, args+4, args+5,
+			   args+6, args+7, args+8)) != 9)) {
+	printf("Error: 'polygon' requires 9 arguments of type double, found %d\n", nargs);
+      } else {
+	add_polygon(trigs, args[0], args[1], args[2], args[3], args[4],
+		    args[5], args[6], args[7], args[8]);
+	print_matrix("trigs", trigs);
+      }
     } else if (!strcmp(line, "box")) {
       double *args = malloc(6 * sizeof(double));
       int nargs;
@@ -213,12 +247,16 @@ void parse_file ( char * input) {
       }
     } else if (!strcmp(line, "apply")) {
       edges = matrix_mult(transform, edges);
+      trigs = matrix_mult(transform, trigs);
     } else if (!strcmp(line, "clear")) {
       edges = new_matrix(4, 50);
+      trigs = new_matrix(4, 75);
     } else if (!strcmp(line, "draw")) {
       draw_lines(edges, s, c);
+      draw_polygons(trigs, s, c);
     } else if (!strcmp(line, "save")) {
       draw_lines(edges, s, c);
+      draw_polygons(trigs, s, c);
       
       char *filename = malloc(32);
       if (!fgets(argline, 255, f) || (sscanf(argline, "%s", filename) == 0)) {
