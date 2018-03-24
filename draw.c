@@ -45,7 +45,7 @@ should use add_point
 
 int check_even(struct matrix *points) {
   if (points->lastcol % 2 == 0) {
-    printf("Error: noneven number of points, adding origin\n");
+
     add_point(points, 0, 0, 0);
     return 1;
   }
@@ -65,10 +65,11 @@ void add_polygon(struct matrix * points,
 		 double x0, double y0, double z0,
 		 double x1, double y1, double z1,
 		 double x2, double y2, double z2) {
-  
+
   add_point(points, x0, y0, z0);
   add_point(points, x1, y1, z1);
   add_point(points, x2, y2, z2);
+
 }
 
 void add_matrix(struct matrix *points, struct matrix *mo_points) {
@@ -109,8 +110,6 @@ int abs(int a) {
 }
 
 void draw_shallow(int x0, int y0, int x1, int y1, screen s, color c) {
-  //printf("Shallow Input (%d, %d) -> (%d, %d)\n", x0, y0, x1, y1);
-
   //ternary operators account for both positive and negative slopes
 
   int dx = abs(x1 - x0);
@@ -123,8 +122,6 @@ void draw_shallow(int x0, int y0, int x1, int y1, screen s, color c) {
   int y = y0;
   int x = x0 - ddx;
 
-  //  printf("Initial (%d, %d); ddy: %d\n", x, y, ddy);
-  
   while ((x += ddx) != x1) {
     plot(s, c, x, y);
 
@@ -138,7 +135,6 @@ void draw_shallow(int x0, int y0, int x1, int y1, screen s, color c) {
 }
 
 void draw_steep(int x0, int y0, int x1, int y1, screen s, color c) {
-  //  printf("Steep Input (%d, %d) -> (%d, %d)\n", x0, y0, x1, y1);
   
   //x and y switched from abovex
   int dx = abs(x1 - x0);
@@ -152,8 +148,6 @@ void draw_steep(int x0, int y0, int x1, int y1, screen s, color c) {
 
   int y = y0 - ddy;
 
-  //  printf("Initial (%d, %d); ddx: %d\n", x, y, ddx);
-  
   while ((y += ddy) != y1) {
 
     plot(s, c, x, y);
@@ -167,9 +161,7 @@ void draw_steep(int x0, int y0, int x1, int y1, screen s, color c) {
   }
 }
 
-//Insert your line algorithm here
 void draw_line(int x0, int y0, int x1, int y1, screen s, color c) {
-  //printf("Drawing line (%d, %d) -> (%d, %d)\n", x0, y0, x1, y1);
   
   if (x0 == x1) {
     int y;
@@ -217,7 +209,6 @@ int draw_polygon(double x0, double y0, double z0,
 		 double x1, double y1, double z1,
 		 double x2, double y2, double z2,
 		 screen s, color c) {
-
   /* back-face culling assumes that all 3d shapes are solids, and thus only the front faces must be drawn.
      This is computed by taking the cross product of v1 - v0 and v2 - v0
      If the z component is positive, it faces forwards and should be displayed
@@ -227,7 +218,7 @@ int draw_polygon(double x0, double y0, double z0,
      (v1 - v0) x (v2 - v0) = <smth, smth, (x1 - x0)(y2 - y0) - (y1 - y0)(x2 - x0)>
   */
 
-  if ((x1 - x0) * (y2 - 20) <= (y1 - y0) * (x2 - x0)) {
+  if ((x1 - x0) * (y2 - y0) <= (y1 - y0) * (x2 - x0)) {
     return 0;
   } else {
     draw_line(x0, y0, x1, y1, s, c);
@@ -333,27 +324,36 @@ void add_curve(struct matrix *points,
   }
 }
 	     
-void add_box(struct matrix *points, double x, double y, double z, double x_depth, double y_depth, double z_depth) {
-  double vals[3] = {x, y, z};
+void add_box(struct matrix *points, double x0, double y0, double z0, double x_depth, double y_depth, double z_depth) {
+  
+  double vals[3] = {x0, y0, z0};
   double depths[3] = {x_depth, y_depth, z_depth};
-  int i, a, b;
+  int i, j, a, b, c;
   for (i = 0; i < 3; i++) {
     for (a = 0; a < 2; a++) {
+      
+      double vertices[4][3];
       for (b = 0; b < 2; b++) {
-	double xyz0[3], xyz1[3];
-	xyz0[i] = vals[i];
-	xyz0[(i + 1) % 3] = vals[(i + 1) % 3] + a * depths[(i + 1) % 3];	
-	xyz0[(i + 2) % 3] = vals[(i + 2) % 3] + b * depths[(i + 2) % 3];
-
-	xyz1[i] = vals[i] + depths[i];
-	xyz1[(i + 1) % 3] = xyz0[(i + 1) % 3];
-	xyz1[(i + 2) % 3] = xyz0[(i + 2) % 3];
-	add_edge(points, xyz0[0], xyz0[1], xyz0[2], xyz1[0], xyz1[1], xyz1[2]);
+  	for (c = 0; c < 2; c++) {
+	  j = a? b + 2 * c: c + 2 * b;
+  	  vertices[j][i] = vals[i] + a * depths[i];
+  	  vertices[j][(i + 1) % 3] = vals[(i + 1) % 3] + b * depths[(i + 1) % 3];
+  	  vertices[j][(i + 2) % 3] = vals[(i + 2) % 3] + c * depths[(i + 2) % 3];
+  	}
       }
+
+      add_polygon(points,
+  		  vertices[0][0], vertices[0][1], vertices[0][2],
+  		  vertices[1][0], vertices[1][1], vertices[1][2],
+  		  vertices[2][0], vertices[2][1], vertices[2][2]);
+      add_polygon(points,
+  		  vertices[3][0], vertices[3][1], vertices[3][2],
+  		  vertices[2][0], vertices[2][1], vertices[2][2],
+  		  vertices[1][0], vertices[1][1], vertices[1][2]);
     }
   }
 }
-
+ 
 struct matrix *generate_sphere(double cx, double cy, double cz, double r, double step) {
   assert(r > 0);
   struct matrix *points = new_matrix(4, 100);

@@ -30,14 +30,14 @@ The file follows the following format:
 	 circle: add a circle to the edge matrix
 	    takes 4 arguments (x_center, y_center, z_center)
 	                       radius
-	 bezier: draw bezier curve from endpoints and rates of change -
+	 bezier: add a bezier curve to the edge matrix from endpoints and rates of change -
 	    takes 8 arguments (x_0, y_0) (x_1, y_1)
 	                      (dx/dt_0, dy/dt_0) (dx/dt_1, dy/dt_1)
-	 hermite: draw hermite curve from endpoints and control points -
+	 hermite: add hermite curve to edge matrix from endpoints and control points -
 	    takes 8 arguments (x_0, y_0)
                               (ctrlx_0, ctrly_0) (ctrlx_1, ctrly_1)
 			      (x_1, y_1)
-	 box: draw box from minimal coordinate vertex and widths -
+	 box: add box to polygon matrix from minimal coordinate vertex and widths -
 	    takes 6 arguments (x_min, y_min, z_min)
 	                      (x_width, y_width, z_width)
 	 sphere: draw sphere from center and radius -
@@ -73,12 +73,15 @@ The file follows the following format:
 
 ====================*/
 void parse_file ( char * input) {
+  printf("apple\n");
   struct matrix *transform = new_matrix(4, 4);
   ident(transform);
+
   struct matrix *edges = new_matrix(4, 50);
   struct matrix *trigs = new_matrix(4, 75);
+
   screen s;
-  
+
   FILE *f;
   char line[256], argline[256];
 
@@ -127,7 +130,6 @@ void parse_file ( char * input) {
       } else {
 	add_polygon(trigs, args[0], args[1], args[2], args[3], args[4],
 		    args[5], args[6], args[7], args[8]);
-	print_matrix("trigs", trigs);
       }
     } else if (!strcmp(line, "box")) {
       double *args = malloc(6 * sizeof(double));
@@ -136,7 +138,7 @@ void parse_file ( char * input) {
 	  ((nargs = sscanf(argline, "%lf %lf %lf %lf %lf %lf", args, args+1, args+2, args+3, args+4, args+5)) != 6)) {
 	printf("Error: 'box' requires 6 arguments of type double, found %d\n", nargs);
       } else {
-	add_box(edges, args[0], args[1], args[2], args[3], args[4], args[5]);
+	add_box(trigs, args[0], args[1], args[2], args[3], args[4], args[5]);
       }
     } else if (!strcmp(line, "sphere")) {
       double *args = malloc(4 * sizeof(double));
@@ -276,3 +278,4 @@ void parse_file ( char * input) {
   }
 }
   
+//*/

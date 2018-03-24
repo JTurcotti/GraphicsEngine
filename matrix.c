@@ -207,10 +207,10 @@ struct matrix *make_rotX(double theta) {
 struct matrix *make_rotY(double theta) {
   struct matrix *trans = new_matrix(4, 4);
   ident(trans);
-  trans->m[0][0] = cos(theta * CONV);
-  trans->m[0][2] = -1 * sin(theta * CONV);
-  trans->m[2][0] = sin(theta * CONV);
   trans->m[2][2] = cos(theta * CONV);
+  trans->m[2][0] = -1 * sin(theta * CONV);
+  trans->m[0][2] = sin(theta * CONV);
+  trans->m[0][0] = cos(theta * CONV);
   return trans;
 }
 
