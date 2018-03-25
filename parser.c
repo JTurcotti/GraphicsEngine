@@ -147,7 +147,7 @@ void parse_file ( char * input) {
 	  ((nargs = sscanf(argline, "%lf %lf %lf %lf", args, args+1, args+2, args+3)) != 4)) {
 	printf("Error: 'sphere' requires 4 arguments of type double, found %d\n", nargs);
       } else {
-	add_sphere(edges, args[0], args[1], args[2], args[3], STEP_SIZE * 3);
+	add_sphere(trigs, args[0], args[1], args[2], args[3], STEP_SIZE * 5);
       }
     } else if (!strcmp(line, "torus")) {
       double *args = malloc(5 * sizeof(double));
@@ -156,7 +156,7 @@ void parse_file ( char * input) {
 	  ((nargs = sscanf(argline, "%lf %lf %lf %lf %lf", args, args+1, args+2, args+3, args+4)) != 5)) {
 	printf("Error: 'torus' requires 5 arguments of type double, found %d\n", nargs);
       } else {
-	add_torus(edges, args[0], args[1], args[2], args[3], args[4], STEP_SIZE * 2);
+	add_torus(edges, args[0], args[1], args[2], args[3], args[4], STEP_SIZE * 5);
       }
     } else if (!strcmp(line, "circle")) {
       double *args = malloc(4 * sizeof(double));

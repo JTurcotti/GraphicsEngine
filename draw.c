@@ -353,62 +353,73 @@ void add_box(struct matrix *points, double x0, double y0, double z0, double x_de
     }
   }
 }
- 
-struct matrix *generate_sphere(double cx, double cy, double cz, double r, double step) {
-  assert(r > 0);
-  struct matrix *points = new_matrix(4, 100);
 
-  double steps1 = -1 * step;
-  double z, cr, step2, steps2, offset;
-  while ((steps1 += step) <= 1) {
-    z = cz + r * cos(PI * steps1);
-    cr = r * sin(PI * steps1);
-    
-    step2 = step; //cr < .01? 2: step * r / cr;
-    steps2 = -1 * step2;
-    offset = OFFSET; //if this isn't added, layers allign too muchx
-    while ((steps2 += (step2 * (1 + OFFSET))) <= 1) {
-      add_point(points, cx + cr * cos(TAO * (steps2 + offset)), cy + cr * sin(TAO * (steps2 + offset)), z);
-    }
-  }
+//spherical to cylindrical coordinates. theta, phi in [0, 1]
+double *sphere_cartesian(double x, double y, double z, double r, double phi, double theta) {
+  double *xyz = malloc(3 * sizeof(double));
   
-  return points;
+  xyz[0] = x + r * cos(TAO * theta) * sin(PI * phi);
+  xyz[1] = y + r * sin(TAO * theta) * sin(PI * phi);
+  xyz[2] = z + r * cos(PI * phi);
+
+  return xyz;
 }
 
-void add_sphere(struct matrix *points, double cx, double cy, double cz, double r, double step) {
-  struct matrix *sphere_points = generate_sphere(cx, cy, cz, r, step);
-  int i;
-  for (i = 0; i <= sphere_points->lastcol; i++) {
-    add_circle(points, sphere_points->m[0][i], sphere_points->m[1][i], sphere_points->m[2][i], 0.5, step);
-  }
-}
+//tracks coordinates along the surface of a torus, theta phi in [0, 1]
+double *torus_cartesian(double x, double y, double z, double r, double R, double phi, double theta) {
+  double *xyz = malloc(3 * sizeof(double));
 
+  xyz[0] = x + cos(TAO * phi) * (R + r * cos(TAO * theta));
+  xyz[1] = y + sin(TAO * phi) * (R + r * cos(TAO * theta));
+  xyz[2] = z + r * sin(TAO * theta);
 
-
-struct matrix *generate_torus(double cx, double cy, double cz, double slicer, double bigr, double step) {
-  struct matrix *points = new_matrix(4, 100);
-
-  double steps1 = -1 * step;
-  double z, cr, step2, steps2, offset;
-  while ((steps1 += step) <= 1) {
-    z = cz + slicer * sin(TAO * steps1);
-    cr = bigr + slicer * cos(TAO * steps1);
-
-    step2 = step; //cr < .01? 2: step * (bigr + slicer) / cr;
-    steps2 = -1 * step2;
-    offset = OFFSET; //if this isn't added, layers allign too muchx
-    while ((steps2 += (step2 * (1 + OFFSET))) <= 1) {
-      add_point(points, cx + cr * cos(TAO * (steps2 + offset)), cy + cr * sin(TAO * (steps2 + offset)), z);
-    }
-  }
-
-  return points;
+  return xyz;
 }
  
-void add_torus(struct matrix *points, double cx, double cy, double cz, double slicer, double bigr, double step) {
-  struct matrix *torus_points = generate_torus(cx, cy, cz, slicer, bigr, step);
-  int i;
-  for (i = 0; i <= torus_points->lastcol; i++) {
-    add_circle(points, torus_points->m[0][i], torus_points->m[1][i], torus_points->m[2][i], 0.5, step);
+void add_sphere(struct matrix *points, double cx, double cy, double cz, double r, double step) {
+
+  double phi = -1 * step;
+  double theta = -1 * step;
+
+  while ((phi += step) <= 1) {
+    theta = -1 * step;
+    while ((theta += step) <= 1) {
+      double *point1 = sphere_cartesian(cx, cy, cz, r, phi, theta);
+      double *point2 = sphere_cartesian(cx, cy, cz, r, phi, theta + step);
+      double *point3 = sphere_cartesian(cx, cy, cz, r, phi + step, theta);
+      double *point4 = sphere_cartesian(cx, cy, cz, r, phi + step, theta + step);
+      add_polygon(points,
+		  point1[0], point1[1], point1[2],
+		  point2[0], point2[1], point2[2],
+		  point3[0], point3[1], point3[2]);
+      add_polygon(points,
+		  point3[0], point3[1], point3[2],
+		  point2[0], point2[1], point2[2],
+		  point4[0], point4[1], point4[2]);
+    }
+  }
+}
+
+void add_torus(struct matrix *points, double cx, double cy, double cz, double r, double R, double step) {
+
+  double phi = -1 * step;
+  double theta = -1 * step;
+
+  while ((phi += step) <= 1) {
+    theta = -1 * step;
+    while ((theta += step) <= 1) {
+      double *point1 = torus_cartesian(cx, cy, cz, r, R, phi, theta);
+      double *point2 = torus_cartesian(cx, cy, cz, r, R, phi, theta + step);
+      double *point3 = torus_cartesian(cx, cy, cz, r, R, phi + step, theta);
+      double *point4 = torus_cartesian(cx, cy, cz, r, R, phi + step, theta + step);
+      add_polygon(points,
+		  point1[0], point1[1], point1[2],
+		  point2[0], point2[1], point2[2],
+		  point3[0], point3[1], point3[2]);
+      add_polygon(points,
+		  point3[0], point3[1], point3[2],
+		  point2[0], point2[1], point2[2],
+		  point4[0], point4[1], point4[2]);
+    }
   }
 }
